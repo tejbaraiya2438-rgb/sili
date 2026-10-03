@@ -1,0 +1,216 @@
+{
+    "questions": [
+        {
+            "id": "q001",
+            "question": "What is Silver Oak University?",
+            "keywords": [
+                "silver oak university",
+                "what is sou",
+                "what is silver oak",
+                "tell me about silver oak"
+            ],
+            "answer": "Silver Oak University is a higher-education institution in Ahmedabad, Gujarat. SILI can help you explore information about the university, academics, campus, admissions and other predefined topics.",
+            "related": [
+                "q002",
+                "q003",
+                "q004"
+            ]
+        },
+        {
+            "id": "q002",
+            "question": "Where is Silver Oak University located?",
+            "keywords": [
+                "where is silver oak",
+                "where is sou",
+                "location of silver oak",
+                "sou location",
+                "university location"
+            ],
+            "answer": "Silver Oak University is located in Ahmedabad, Gujarat, India.",
+            "related": [
+                "q001",
+                "q003",
+                "q005"
+            ]
+        },
+        {
+            "id": "q003",
+            "question": "What courses are available at Silver Oak University?",
+            "keywords": [
+                "courses",
+                "available courses",
+                "courses in sou",
+                "courses in silver oak",
+                "programs"
+            ],
+            "answer": "Silver Oak University offers programs across different academic areas. SILI's predefined knowledge base can provide information about specific programs when they are included in the dataset.",
+            "related": [
+                "q001",
+                "q006",
+                "q007"
+            ]
+        },
+        {
+            "id": "q004",
+            "question": "How can I contact Silver Oak University?",
+            "keywords": [
+                "contact silver oak",
+                "contact sou",
+                "contact university",
+                "university contact"
+            ],
+            "answer": "You can use the official Silver Oak University contact channels for current contact information. SILI can also provide predefined contact-related information when it is added to the knowledge base.",
+            "related": [
+                "q001",
+                "q002",
+                "q008"
+            ]
+        },
+        {
+            "id": "q005",
+            "question": "How can I get admission to Silver Oak University?",
+            "keywords": [
+                "admission",
+                "how to get admission",
+                "admission process",
+                "apply for admission",
+                "how can i apply"
+            ],
+            "answer": "Admission requirements and procedures depend on the program. SILI can provide predefined admission information for specific programs included in its knowledge base.",
+            "related": [
+                "q003",
+                "q006",
+                "q009"
+            ]
+        },
+        {
+            "id": "q006",
+            "question": "What is B.Tech?",
+            "keywords": [
+                "btech",
+                "b.tech",
+                "what is btech",
+                "engineering degree"
+            ],
+            "answer": "B.Tech, or Bachelor of Technology, is an undergraduate engineering degree. The exact branches and curriculum depend on the institution and program.",
+            "related": [
+                "q003",
+                "q005",
+                "q007"
+            ]
+        },
+        {
+            "id": "q007",
+            "question": "What is Artificial Intelligence and Machine Learning?",
+            "keywords": [
+                "artificial intelligence",
+                "machine learning",
+                "ai ml",
+                "aiml",
+                "what is ai ml"
+            ],
+            "answer": "Artificial Intelligence and Machine Learning are fields of computing focused on building systems that can perform tasks associated with intelligent behavior and learn patterns from data.",
+            "related": [
+                "q003",
+                "q006",
+                "q010"
+            ]
+        },
+        {
+            "id": "q008",
+            "question": "Where can I find campus information?",
+            "keywords": [
+                "campus",
+                "campus information",
+                "college campus",
+                "university campus"
+            ],
+            "answer": "SILI can provide predefined information about campus facilities, buildings, departments and locations when those details are included in its knowledge base.",
+            "related": [
+                "q002",
+                "q004",
+                "q011"
+            ]
+        },
+        {
+            "id": "q009",
+            "question": "What documents are required for admission?",
+            "keywords": [
+                "documents",
+                "admission documents",
+                "required documents",
+                "documents required"
+            ],
+            "answer": "Required documents can vary by program and admission process. Specific document requirements can be added to SILI's predefined knowledge base.",
+            "related": [
+                "q005",
+                "q003",
+                "q012"
+            ]
+        },
+        {
+            "id": "q010",
+            "question": "What is the difference between AI and Machine Learning?",
+            "keywords": [
+                "difference ai ml",
+                "ai vs machine learning",
+                "ai and ml difference",
+                "difference between ai and machine learning"
+            ],
+            "answer": "Artificial Intelligence is the broader field of creating systems that perform tasks associated with intelligent behavior. Machine Learning is a subfield of AI that focuses on learning patterns from data.",
+            "related": [
+                "q007",
+                "q006",
+                "q003"
+            ]
+        },
+        {
+            "id": "q011",
+            "question": "What facilities are available on campus?",
+            "keywords": [
+                "campus facilities",
+                "facilities",
+                "college facilities",
+                "university facilities"
+            ],
+            "answer": "Campus facility information can be maintained inside SILI's predefined knowledge base. Specific facilities will be displayed when they are added to the dataset.",
+            "related": [
+                "q008",
+                "q002",
+                "q013"
+            ]
+        },
+        {
+            "id": "q012",
+            "question": "What are the admission requirements?",
+            "keywords": [
+                "admission requirements",
+                "eligibility",
+                "admission eligibility",
+                "requirements for admission"
+            ],
+            "answer": "Admission requirements depend on the specific program. SILI can provide predefined eligibility information for each program added to its dataset.",
+            "related": [
+                "q005",
+                "q009",
+                "q003"
+            ]
+        },
+        {
+            "id": "q013",
+            "question": "What departments are available?",
+            "keywords": [
+                "departments",
+                "department",
+                "academic departments",
+                "branches"
+            ],
+            "answer": "Department and branch information can be maintained in SILI's predefined knowledge base. Ask about a specific department to retrieve its stored information.",
+            "related": [
+                "q003",
+                "q008",
+                "q006"
+            ]
+        }
+    ]
+}

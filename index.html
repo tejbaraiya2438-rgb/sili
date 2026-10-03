@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SILI — Silver Oak Intelligence</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- HEADER -->
+        <header class="topbar">
+            <div class="brand">
+                <div class="logo">S</div>
+
+                <div>
+                    <h1>SILI</h1>
+                    <p>Silver Oak Intelligence</p>
+                </div>
+            </div>
+
+            <div class="status">
+                <span class="status-dot"></span>
+                Online
+            </div>
+        </header>
+
+
+        <!-- CHAT AREA -->
+        <main class="chat-container">
+
+            <!-- INTRO -->
+            <section class="welcome" id="welcome">
+
+                <div class="welcome-logo">S</div>
+
+                <h2>Hello, I'm SILI.</h2>
+
+                <p>
+                    Silver Oak Intelligence
+                </p>
+
+                <h3>
+                    How can I help you today?
+                </h3>
+
+            </section>
+
+
+            <!-- MESSAGES -->
+            <section class="messages" id="messages">
+            </section>
+
+        </main>
+
+
+        <!-- INPUT AREA -->
+        <footer class="input-area">
+
+            <div class="input-box">
+
+                <input
+                    type="text"
+                    id="questionInput"
+                    placeholder="Ask SILI anything about Silver Oak..."
+                    autocomplete="off"
+                >
+
+                <button id="sendButton">
+                    <span>➤</span>
+                </button>
+
+            </div>
+
+            <p class="disclaimer">
+                SILI provides information from its predefined knowledge base.
+            </p>
+
+        </footer>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
