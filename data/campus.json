@@ -1,0 +1,43 @@
+
+{
+  "university": {
+    "name": "Silver Oak University",
+    "short_name": "SOU",
+    "location": "Ahmedabad, Gujarat, India",
+    "official_website": "https://silveroakuni.ac.in"
+  },
+  "assistant": {
+    "name": "SILI-PRO",
+    "purpose": "Answer questions about Silver Oak University and its campus.",
+    "scope": [
+      "campus navigation",
+      "buildings and rooms",
+      "laboratories and workshops",
+      "faculties and departments",
+      "library and student facilities",
+      "examinations and academic information",
+      "campus events"
+    ]
+  },
+  "campus_locations": [],
+  "departments": [],
+  "faculties": [],
+  "laboratories": [],
+  "workshops": [],
+  "libraries": [],
+  "student_facilities": [],
+  "events": [
+    {
+      "name": "Avishkar",
+      "date": "24 October",
+      "year": null,
+      "verified": false,
+      "notes": "The year and current event details need verification."
+    }
+  ],
+  "rules": [
+    "Do not invent room numbers, directions, faculty names, timings, or university policies.",
+    "If campus information is missing, clearly say that it is not available in the current knowledge base.",
+    "Recommend checking the official university website for information that needs verification."
+  ]
+}

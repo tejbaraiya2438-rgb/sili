@@ -3,90 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>SILI — Silver Oak Intelligence</title>
-
-    <link rel="stylesheet" href="style.css">
+    <meta name="theme-color" content="#8b1e3f">
+    <title>SILI-PRO | Silver Oak University</title>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
-
 <body>
-
-    <div class="app">
-
-        <!-- HEADER -->
-        <header class="topbar">
+    <div class="app-shell">
+        <aside class="sidebar" id="sidebar">
             <div class="brand">
-                <div class="logo">S</div>
-
+                <div class="brand-icon">S</div>
                 <div>
-                    <h1>SILI</h1>
-                    <p>Silver Oak Intelligence</p>
+                    <h2>SILI<span>-PRO</span></h2>
+                    <p>Silver Oak University</p>
                 </div>
+                <button class="icon-button close-sidebar" id="closeSidebar"
+                    aria-label="Close menu">✕</button>
             </div>
 
-            <div class="status">
-                <span class="status-dot"></span>
-                Online
-            </div>
-        </header>
+            <button class="new-chat" id="newChat">
+                <span>＋</span> New conversation
+            </button>
 
-
-        <!-- CHAT AREA -->
-        <main class="chat-container">
-
-            <!-- INTRO -->
-            <section class="welcome" id="welcome">
-
-                <div class="welcome-logo">S</div>
-
-                <h2>Hello, I'm SILI.</h2>
-
-                <p>
-                    Silver Oak Intelligence
-                </p>
-
-                <h3>
-                    How can I help you today?
-                </h3>
-
-            </section>
-
-
-            <!-- MESSAGES -->
-            <section class="messages" id="messages">
-            </section>
-
-        </main>
-
-
-        <!-- INPUT AREA -->
-        <footer class="input-area">
-
-            <div class="input-box">
-
-                <input
-                    type="text"
-                    id="questionInput"
-                    placeholder="Ask SILI anything about Silver Oak..."
-                    autocomplete="off"
-                >
-
-                <button id="sendButton">
-                    <span>➤</span>
+            <div class="sidebar-label">CAMPUS ASSISTANT</div>
+            <nav class="nav-links">
+                <button class="nav-item active" data-prompt="Help me navigate Silver Oak University campus">
+                    <span>⌖</span> Campus navigation
                 </button>
+                <button class="nav-item" data-prompt="Tell me about laboratories and workshops at Silver Oak University">
+                    <span>⌘</span> Labs & workshops
+                </button>
+                <button class="nav-item" data-prompt="How can I find faculty and departments at Silver Oak University?">
+                    <span>♧</span> Faculty & departments
+                </button>
+                <button class="nav-item" data-prompt="Tell me about events at Silver Oak University">
+                    <span>▦</span> Campus events
+                </button>
+                <button class="nav-item" data-prompt="Where can I find the library and student facilities at Silver Oak University?">
+                    <span>⌂</span> Student facilities
+                </button>
+            </nav>
 
+            <div class="sidebar-bottom">
+                <div class="privacy-note">
+                    <span class="status-dot"></span>
+                    <div>
+                        <strong>SILI Assistant</strong>
+                        <p>Campus-focused AI</p>
+                    </div>
+                </div>
+                <p class="sidebar-footer">Built for the SOU community</p>
             </div>
+        </aside>
 
-            <p class="disclaimer">
-                SILI provides information from its predefined knowledge base.
-            </p>
+        <main class="main-panel">
+            <header class="topbar">
+                <button class="icon-button menu-button" id="menuButton"
+                    aria-label="Open menu">☰</button>
+                <div class="mobile-brand">
+                    <span class="mini-logo">S</span>
+                    <strong>SILI-PRO</strong>
+                </div>
+                <div class="topbar-status">
+                    <span class="status-dot"></span>
+                    <span>Campus AI</span>
+                </div>
+            </header>
 
-        </footer>
+            <section class="chat-area" id="chatArea">
+                <div class="welcome" id="welcome">
+                    <div class="welcome-logo">
+                        <div class="logo-orbit"></div>
+                        <span>S</span>
+                    </div>
+                    <p class="eyebrow">YOUR CAMPUS COMPANION</p>
+                    <h1>Hello, I'm <span>SILI.</span></h1>
+                    <p class="welcome-description">
+                        Your AI assistant for Silver Oak University.
+                        What would you like to explore today?
+                    </p>
 
+                    <div class="suggestion-grid">
+                        <button class="suggestion-card" data-prompt="Help me navigate Silver Oak University campus">
+                            <span class="suggestion-icon">⌖</span>
+                            <strong>Campus navigation</strong>
+                            <small>Find buildings and rooms</small>
+                            <span class="card-arrow">↗</span>
+                        </button>
+                        <button class="suggestion-card" data-prompt="Tell me about laboratories and workshops at Silver Oak University">
+                            <span class="suggestion-icon">⌘</span>
+                            <strong>Labs & workshops</strong>
+                            <small>Explore campus facilities</small>
+                            <span class="card-arrow">↗</span>
+                        </button>
+                        <button class="suggestion-card" data-prompt="Tell me about faculty and departments at Silver Oak University">
+                            <span class="suggestion-icon">♧</span>
+                            <strong>Faculty & departments</strong>
+                            <small>Find academic information</small>
+                            <span class="card-arrow">↗</span>
+                        </button>
+                        <button class="suggestion-card" data-prompt="Tell me about upcoming events at Silver Oak University">
+                            <span class="suggestion-icon">▦</span>
+                            <strong>Campus events</strong>
+                            <small>Discover university activities</small>
+                            <span class="card-arrow">↗</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="messages" id="messages" aria-live="polite"></div>
+            </section>
+
+            <footer class="composer-section">
+                <div class="composer">
+                    <textarea id="messageInput" rows="1" maxlength="1000"
+                        placeholder="Ask SILI about your campus..."
+                        aria-label="Message SILI"></textarea>
+
+                    <div class="composer-actions">
+                        <div class="composer-hint">
+                            <span class="hint-dot"></span>
+                            SOU campus questions
+                        </div>
+                        <div class="action-buttons">
+                            <button class="icon-button mic-button" id="micButton"
+                                title="Voice input" aria-label="Voice input">🎙</button>
+                            <button class="send-button" id="sendButton"
+                                aria-label="Send message" disabled>
+                                <span>↑</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <p class="disclaimer">
+                    SILI can make mistakes. Verify important campus information with SOU.
+                </p>
+            </footer>
+        </main>
     </div>
 
+    <div class="toast" id="toast" role="status"></div>
 
-    <script src="script.js"></script>
-
+    <script src="/static/js/voice.js"></script>
+    <script src="/static/js/app.js"></script>
 </body>
 </html>
