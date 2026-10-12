@@ -62,13 +62,16 @@ async def generate_speech(request: SpeechRequest):
 
     except httpx.HTTPStatusError as exc:
         status = exc.response.status_code
+        # Log upstream status and a limited response body; never log API keys.
+        print(f"ElevenLabs upstream HTTP status: {status}")
+        print(f"ElevenLabs upstream response: {exc.response.text[:1000]}")
 
         if status in (401, 403):
             detail = "Voice service authentication failed."
         elif status == 429:
             detail = "Voice service rate limit reached."
         else:
-            detail = "Voice generation failed. Please try again."
+            detail = "Voice generation failed. Check server logs."
 
         raise HTTPException(status_code=502, detail=detail)
 

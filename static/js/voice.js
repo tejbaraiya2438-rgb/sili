@@ -1,165 +1,250 @@
 "use strict";
 
 window.SILIVoice = (() => {
-let recognition = null;
-let listening = false;
-let currentAudio = null;
-let audioUrl = null;
+    let recognition = null;
+    let listening = false;
+    let currentAudio = null;
+    let audioUrl = null;
+    let speechSession = 0;
 
-function setMicState(active) {
-    listening = active;
-    const mic = document.getElementById("micButton");
+    function setMicState(active) {
+        listening = active;
+        const mic = document.getElementById("micButton");
 
-    if (mic) {
-        mic.classList.toggle("listening", active);
-        mic.setAttribute(
-            "aria-label",
-            active ? "Stop listening" : "Start voice input"
-        );
-    }
-}
-
-function stopSpeaking() {
-    if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.src = "";
-        currentAudio = null;
+        if (mic) {
+            mic.classList.toggle("listening", active);
+            mic.setAttribute("aria-label", active ? "Stop listening" : "Start voice input");
+            mic.setAttribute("aria-pressed", String(active));
+        }
     }
 
-    if (audioUrl) {
-        URL.revokeObjectURL(audioUrl);
-        audioUrl = null;
+    function stopSpeaking() {
+        speechSession++;
+
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.removeAttribute("src");
+            currentAudio.load();
+            currentAudio = null;
+        }
+
+        if (audioUrl) {
+            URL.revokeObjectURL(audioUrl);
+            audioUrl = null;
+        }
+
+        if ("speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+        }
     }
 
-    if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-    }
-}
+    function browserSpeak(text, session) {
+        if (!("speechSynthesis" in window)) {
+            console.error("SILI: Browser speech synthesis unavailable.");
+            return Promise.resolve(false);
+        }
 
-async function speak(text) {
-    const cleanText = String(text || "").trim();
-    if (!cleanText) return;
+        const synthesis = window.speechSynthesis;
+        const utterance = new SpeechSynthesisUtterance(text);
+        const voices = synthesis.getVoices();
 
-    stopSpeaking();
+        const voice =
+            voices.find(v => v.lang.toLowerCase() === "en-in") ||
+            voices.find(v => v.lang.toLowerCase().startsWith("en-")) ||
+            null;
 
-    try {
-        const response = await fetch("/api/speech", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "audio/mpeg"
-            },
-            body: JSON.stringify({ text: cleanText })
+        utterance.lang = voice?.lang || "en-IN";
+        utterance.rate = 1;
+        utterance.pitch = 1;
+
+        if (voice) utterance.voice = voice;
+
+        return new Promise(resolve => {
+            let settled = false;
+            let started = false;
+            let timer;
+
+            const finish = success => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timer);
+                resolve(success);
+            };
+
+            utterance.onstart = () => {
+                started = true;
+                console.log("SILI: Browser speech started.");
+            };
+
+            utterance.onend = () => finish(true);
+
+            utterance.onerror = event => {
+                console.error("SILI browser TTS error:", event.error);
+                finish(false);
+            };
+
+            if (session !== speechSession) {
+                finish(false);
+                return;
+            }
+
+            timer = setTimeout(() => {
+                if (!started) {
+                    console.error("SILI: Browser speech did not start.");
+                    synthesis.cancel();
+                    finish(false);
+                }
+            }, 8000);
+
+            synthesis.cancel();
+            synthesis.speak(utterance);
         });
+    }
 
-        if (!response.ok) {
-            browserSpeak(cleanText);
+    async function speak(text) {
+        const cleanText = String(text || "").trim();
+        if (!cleanText) return;
+
+        stopSpeaking();
+        const session = speechSession;
+
+        // Free browser voice is attempted first.
+        const browserSuccess = await browserSpeak(cleanText, session);
+
+        if (session !== speechSession || browserSuccess) return;
+
+        // Browser TTS is the free voice provider.
+        // Do not call ElevenLabs unless a supported voice is configured.
+        console.warn("SILI: Browser speech failed; ElevenLabs fallback disabled.");
+        return;
+
+        try {
+            const response = await fetch("/api/speech", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "audio/mpeg"
+                },
+                body: JSON.stringify({ text: cleanText })
+            });
+
+            if (!response.ok) {
+                console.error(
+                    "SILI speech API failed:",
+                    response.status,
+                    await response.text().catch(() => "")
+                );
+                return;
+            }
+
+            const blob = await response.blob();
+            if (!blob.size || session !== speechSession) return;
+
+            audioUrl = URL.createObjectURL(blob);
+            const playbackUrl = audioUrl;
+            const audio = new Audio(playbackUrl);
+            currentAudio = audio;
+
+            audio.onended = () => {
+                if (currentAudio === audio) currentAudio = null;
+                if (audioUrl === playbackUrl) {
+                    URL.revokeObjectURL(playbackUrl);
+                    audioUrl = null;
+                }
+            };
+
+            audio.onerror = () => {
+                console.error("SILI: Audio playback failed.");
+            };
+
+            await audio.play();
+            console.log("SILI: Speech API playback started.");
+        } catch (error) {
+            console.error("SILI speech playback failed:", error);
+        }
+    }
+
+    function toggleListening(onResult, onError) {
+        const SpeechRecognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            onError?.("Voice input is not supported in this browser. Try Chrome.");
             return;
         }
 
-        const audioBlob = await response.blob();
-
-        if (!audioBlob.size) {
-            browserSpeak(cleanText);
+        if (listening && recognition) {
+            recognition.stop();
+            setMicState(false);
             return;
         }
 
-        audioUrl = URL.createObjectURL(audioBlob);
-        currentAudio = new Audio(audioUrl);
+        const instance = new SpeechRecognition();
+        const session = ++speechSession;
+        recognition = instance;
 
-        currentAudio.onended = () => stopSpeaking();
-        currentAudio.onerror = () => {
-            stopSpeaking();
-            browserSpeak(cleanText);
+        instance.lang = "en-IN";
+        instance.interimResults = true;
+        instance.continuous = false;
+        instance.maxAlternatives = 1;
+
+        let finalTranscript = "";
+        let resultSent = false;
+
+        instance.onstart = () => setMicState(true);
+
+        instance.onresult = event => {
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const result = event.results[i];
+                const transcript = result[0]?.transcript || "";
+
+                if (result.isFinal && transcript.trim()) {
+                    finalTranscript += " " + transcript.trim();
+                }
+            }
+
+            if (
+                finalTranscript.trim() &&
+                !resultSent &&
+                session === speechSession
+            ) {
+                resultSent = true;
+                onResult?.(finalTranscript.trim());
+            }
         };
 
-        await currentAudio.play();
-    } catch {
-        browserSpeak(cleanText);
-    }
-}
+        instance.onerror = event => {
+            setMicState(false);
+            if (event.error === "aborted") return;
 
-function browserSpeak(text) {
-    if (!("speechSynthesis" in window)) return;
-
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-IN";
-    utterance.rate = 1;
-
-    window.speechSynthesis.speak(utterance);
-}
-
-function toggleListening(onResult, onError) {
-    const SpeechRecognition =
-        window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-        if (typeof onError === "function") {
-            onError("Voice input is not supported by this browser.");
-        }
-        return;
-    }
-
-    if (listening && recognition) {
-        recognition.stop();
-        setMicState(false);
-        return;
-    }
-
-    recognition = new SpeechRecognition();
-    recognition.lang = "en-IN";
-    recognition.interimResults = true;
-    recognition.continuous = false;
-
-    recognition.onstart = () => setMicState(true);
-
-    recognition.onresult = (event) => {
-        let transcript = "";
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            transcript += event.results[i][0].transcript;
-        }
-
-        if (transcript.trim() && typeof onResult === "function") {
-            onResult(transcript.trim());
-        }
-    };
-
-    recognition.onerror = (event) => {
-        setMicState(false);
-
-        if (typeof onError === "function") {
-            onError(
+            const message =
                 event.error === "not-allowed"
                     ? "Please allow microphone access in your browser."
-                    : "Voice input failed. Please try again."
-            );
-        }
-    };
+                    : event.error === "no-speech"
+                        ? "No speech detected. Tap the microphone and try again."
+                        : `Voice input failed: ${event.error}`;
 
-    recognition.onend = () => {
-        setMicState(false);
-        recognition = null;
-    };
+            onError?.(message);
+        };
 
-    try {
-        recognition.start();
-    } catch {
-        setMicState(false);
+        instance.onend = () => {
+            setMicState(false);
+            if (recognition === instance) recognition = null;
+        };
 
-        if (typeof onError === "function") {
-            onError("Could not start the microphone. Try again.");
+        try {
+            instance.start();
+        } catch (error) {
+            setMicState(false);
+            recognition = null;
+            onError?.("Could not start microphone. Please try again.");
         }
     }
-}
 
-return {
-    speak,
-    stopSpeaking,
-    toggleListening
-};
-
+    return {
+        speak,
+        stopSpeaking,
+        toggleListening
+    };
 })();

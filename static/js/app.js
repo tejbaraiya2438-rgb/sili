@@ -23,10 +23,6 @@ const SILI = (() => {
     let activeController = null;
     let toastTimer = null;
 
-    /*
-     * Keep the API path relative so the frontend works
-     * when served by the FastAPI application.
-     */
     const API_URL = "/api/chat";
 
     function showToast(message) {
@@ -36,6 +32,7 @@ const SILI = (() => {
         elements.toast.classList.add("show");
 
         clearTimeout(toastTimer);
+
         toastTimer = setTimeout(() => {
             elements.toast.classList.remove("show");
         }, 3000);
@@ -83,8 +80,6 @@ const SILI = (() => {
 
         const bubble = document.createElement("div");
         bubble.className = "message-bubble";
-
-        // textContent prevents model responses from being treated as HTML.
         bubble.textContent = text;
 
         content.append(name, bubble);
@@ -115,8 +110,10 @@ const SILI = (() => {
 
         tools.appendChild(copyButton);
 
-        // Voice playback will be supplied by voice.js.
-        if (window.SILIVoice && typeof window.SILIVoice.speak === "function") {
+        if (
+            window.SILIVoice &&
+            typeof window.SILIVoice.speak === "function"
+        ) {
             const speakButton = document.createElement("button");
             speakButton.type = "button";
             speakButton.className = "message-tool";
@@ -145,6 +142,7 @@ const SILI = (() => {
         }
 
         message.bubble.appendChild(indicator);
+
         return message.wrapper;
     }
 
@@ -172,7 +170,6 @@ const SILI = (() => {
             throw new Error("The server returned an invalid response.");
         }
 
-        // Supports common API response shapes.
         const reply =
             data.reply ??
             data.response ??
@@ -246,6 +243,7 @@ const SILI = (() => {
             elements.welcome.hidden = true;
         }
 
+        // Display both typed and recognized voice messages.
         createMessage("user", message);
 
         elements.input.value = "";
@@ -264,6 +262,15 @@ const SILI = (() => {
 
             const assistantMessage = createMessage("assistant", reply);
             addAssistantTools(assistantMessage.content, reply);
+
+            // Automatically speak every successful response.
+            if (
+                window.SILIVoice &&
+                typeof window.SILIVoice.speak === "function"
+            ) {
+                window.SILIVoice.speak(reply);
+            }
+
         } catch (error) {
             typing.remove();
 
@@ -290,9 +297,12 @@ const SILI = (() => {
             retry.className = "message-tool";
             retry.textContent = "Try again";
 
-            retry.addEventListener("click", () => sendMessage(message));
+            retry.addEventListener("click", () => {
+                sendMessage(message);
+            });
 
             assistantMessage.content.appendChild(retry);
+
         } finally {
             activeController = null;
             setSending(false);
@@ -318,6 +328,13 @@ const SILI = (() => {
             elements.welcome.hidden = false;
         }
 
+        if (
+            window.SILIVoice &&
+            typeof window.SILIVoice.stopSpeaking === "function"
+        ) {
+            window.SILIVoice.stopSpeaking();
+        }
+
         elements.input.focus();
     }
 
@@ -325,7 +342,10 @@ const SILI = (() => {
         document.querySelectorAll("[data-prompt]").forEach((button) => {
             button.addEventListener("click", () => {
                 const prompt = button.getAttribute("data-prompt");
-                if (prompt) sendMessage(prompt);
+
+                if (prompt) {
+                    sendMessage(prompt);
+                }
             });
         });
     }
@@ -352,13 +372,13 @@ const SILI = (() => {
             ) {
                 window.SILIVoice.toggleListening(
                     (transcript) => {
-                        elements.input.value = transcript;
-                        resizeInput();
-                        elements.send.disabled =
-                            isSending || !transcript.trim();
-                        elements.input.focus();
+                        if (transcript && transcript.trim()) {
+                            sendMessage(transcript.trim());
+                        }
                     },
-                    (message) => showToast(message)
+                    (message) => {
+                        showToast(message);
+                    }
                 );
             } else {
                 showToast("Voice input is not available yet.");
@@ -367,10 +387,13 @@ const SILI = (() => {
     }
 
     function init() {
-        elements.send.addEventListener("click", () => sendMessage());
+        elements.send.addEventListener("click", () => {
+            sendMessage();
+        });
 
         elements.input.addEventListener("input", () => {
             resizeInput();
+
             elements.send.disabled =
                 isSending || !elements.input.value.trim();
         });
@@ -391,15 +414,17 @@ const SILI = (() => {
         elements.closeSidebar?.addEventListener("click", closeSidebar);
 
         document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape") closeSidebar();
+            if (event.key === "Escape") {
+                closeSidebar();
+            }
         });
 
         document.addEventListener("click", (event) => {
             if (
                 window.innerWidth <= 650 &&
-                elements.sidebar.classList.contains("open") &&
+                elements.sidebar?.classList.contains("open") &&
                 !elements.sidebar.contains(event.target) &&
-                !elements.menu.contains(event.target)
+                !elements.menu?.contains(event.target)
             ) {
                 closeSidebar();
             }
@@ -413,7 +438,12 @@ const SILI = (() => {
         console.log("SILI-PRO frontend initialized.");
     }
 
-    return { init, sendMessage, resetChat, showToast };
+    return {
+        init,
+        sendMessage,
+        resetChat,
+        showToast
+    };
 })();
 
 document.addEventListener("DOMContentLoaded", SILI.init);
