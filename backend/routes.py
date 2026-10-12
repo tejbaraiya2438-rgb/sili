@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
@@ -29,10 +28,10 @@ async def chat(request: ChatRequest):
     if not is_campus_related(message):
         return ChatResponse(
             reply=(
-                "I'm SILI-PRO, your Silver Oak University campus assistant. "
-                "I can help with campus navigation, labs, workshops, "
-                "faculties, departments, libraries, events, exams, "
-                "and student facilities."
+                "Main SILI-PRO hoon, Silver Oak University (SOU) ki "
+                "campus assistant. Main aapki campus navigation, "
+                "buildings, rooms, laboratories, faculties aur university "
+                "events se judi jaankari dene mein madad kar sakti hoon."
             )
         )
 

@@ -1,8 +1,35 @@
+# Environment variables and secrets
 .env
 .env.*
 !.env.example
+
+# Python cache
 __pycache__/
 *.py[cod]
+*$py.class
+
+# Virtual environments
 .venv/
 venv/
-node_modules/
+env/
+
+# Test and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editors and operating system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.bak
+
+# Generated audio
+static/audio/*
+!static/audio/.gitkeep
