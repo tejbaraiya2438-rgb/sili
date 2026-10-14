@@ -32,7 +32,6 @@ const SILI = (() => {
         elements.toast.classList.add("show");
 
         clearTimeout(toastTimer);
-
         toastTimer = setTimeout(() => {
             elements.toast.classList.remove("show");
         }, 3000);
@@ -84,7 +83,6 @@ const SILI = (() => {
 
         content.append(name, bubble);
         wrapper.append(avatar, content);
-
         elements.messages.appendChild(wrapper);
 
         return { wrapper, content, bubble };
@@ -142,7 +140,6 @@ const SILI = (() => {
         }
 
         message.bubble.appendChild(indicator);
-
         return message.wrapper;
     }
 
@@ -151,10 +148,9 @@ const SILI = (() => {
         elements.send.disabled = value || !elements.input.value.trim();
         elements.input.disabled = value;
 
-        if (value) {
-            elements.send.innerHTML = "<span>…</span>";
-        } else {
-            elements.send.innerHTML = "<span>↑</span>";
+        elements.send.innerHTML = value ? "<span>…</span>" : "<span>↑</span>";
+
+        if (!value) {
             elements.input.disabled = false;
         }
     }
@@ -223,7 +219,7 @@ const SILI = (() => {
         return extractReply(data);
     }
 
-    async function sendMessage(prefilledMessage) {
+    async function sendMessage(prefilledMessage, source = "text") {
         if (isSending) return;
 
         const message = (
@@ -239,11 +235,27 @@ const SILI = (() => {
             return;
         }
 
+        // Only microphone-originated questions get automatic voice replies.
+        const shouldAutoSpeak = source === "voice";
+
+        // Typed input must never trigger automatic speech.
+        // Also stop any previous speech when a typed question is sent.
+        if (!shouldAutoSpeak && window.SILIVoice &&
+            typeof window.SILIVoice.stopSpeaking === "function") {
+            window.SILIVoice.stopSpeaking();
+        }
+
+        console.log(
+            "[SILI] Input mode:",
+            shouldAutoSpeak ? "VOICE — auto-speak enabled" : "TEXT — auto-speak disabled"
+        );
+        console.log("[SILI DEBUG] Input source:", source,
+                    "| Automatic voice:", shouldAutoSpeak);
+
         if (elements.welcome) {
             elements.welcome.hidden = true;
         }
 
-        // Display both typed and recognized voice messages.
         createMessage("user", message);
 
         elements.input.value = "";
@@ -263,12 +275,16 @@ const SILI = (() => {
             const assistantMessage = createMessage("assistant", reply);
             addAssistantTools(assistantMessage.content, reply);
 
-            // Automatically speak every successful response.
+            // Voice question: speak automatically.
+            // Typed question: text only; user can tap Listen.
             if (
+                shouldAutoSpeak &&
                 window.SILIVoice &&
                 typeof window.SILIVoice.speak === "function"
             ) {
-                window.SILIVoice.speak(reply);
+                if (shouldAutoSpeak) {
+                    window.SILIVoice.speak(reply);
+                }
             }
 
         } catch (error) {
@@ -285,11 +301,7 @@ const SILI = (() => {
                     ? "I couldn't connect to the server. Make sure SILI-PRO's backend is running and try again."
                     : error.message || "Something went wrong. Please try again.";
 
-            const assistantMessage = createMessage(
-                "assistant",
-                errorMessage
-            );
-
+            const assistantMessage = createMessage("assistant", errorMessage);
             assistantMessage.wrapper.classList.add("error-message");
 
             const retry = document.createElement("button");
@@ -298,7 +310,7 @@ const SILI = (() => {
             retry.textContent = "Try again";
 
             retry.addEventListener("click", () => {
-                sendMessage(message);
+                sendMessage(message, source);
             });
 
             assistantMessage.content.appendChild(retry);
@@ -339,21 +351,18 @@ const SILI = (() => {
     }
 
     function bindSuggestions() {
-        document.querySelectorAll("[data-prompt]").forEach((button) => {
+        document.querySelectorAll("[data-prompt]").forEach(button => {
             button.addEventListener("click", () => {
                 const prompt = button.getAttribute("data-prompt");
-
-                if (prompt) {
-                    sendMessage(prompt);
-                }
+                if (prompt) sendMessage(prompt, "text");
             });
         });
     }
 
     function bindNavigation() {
-        document.querySelectorAll(".nav-item").forEach((button) => {
+        document.querySelectorAll(".nav-item").forEach(button => {
             button.addEventListener("click", () => {
-                document.querySelectorAll(".nav-item").forEach((item) => {
+                document.querySelectorAll(".nav-item").forEach(item => {
                     item.classList.remove("active");
                 });
 
@@ -371,14 +380,12 @@ const SILI = (() => {
                 typeof window.SILIVoice.toggleListening === "function"
             ) {
                 window.SILIVoice.toggleListening(
-                    (transcript) => {
+                    transcript => {
                         if (transcript && transcript.trim()) {
-                            sendMessage(transcript.trim());
+                            sendMessage(transcript.trim(), "voice");
                         }
                     },
-                    (message) => {
-                        showToast(message);
-                    }
+                    message => showToast(message)
                 );
             } else {
                 showToast("Voice input is not available yet.");
@@ -388,24 +395,23 @@ const SILI = (() => {
 
     function init() {
         elements.send.addEventListener("click", () => {
-            sendMessage();
+            sendMessage(undefined, "text");
         });
 
         elements.input.addEventListener("input", () => {
             resizeInput();
-
             elements.send.disabled =
                 isSending || !elements.input.value.trim();
         });
 
-        elements.input.addEventListener("keydown", (event) => {
+        elements.input.addEventListener("keydown", event => {
             if (
                 event.key === "Enter" &&
                 !event.shiftKey &&
                 !event.isComposing
             ) {
                 event.preventDefault();
-                sendMessage();
+                sendMessage(undefined, "text");
             }
         });
 
@@ -413,13 +419,11 @@ const SILI = (() => {
         elements.menu?.addEventListener("click", openSidebar);
         elements.closeSidebar?.addEventListener("click", closeSidebar);
 
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape") {
-                closeSidebar();
-            }
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") closeSidebar();
         });
 
-        document.addEventListener("click", (event) => {
+        document.addEventListener("click", event => {
             if (
                 window.innerWidth <= 650 &&
                 elements.sidebar?.classList.contains("open") &&
